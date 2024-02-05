@@ -1,0 +1,68 @@
+---
+title: "Predicting Implicit Attitudes"
+subtitle: |
+  | Final Project Memo 1
+  | Data Science 1 with R (Stat 301-2)
+author: "Jonathan Doriscar"
+date: today
+
+format: 
+  html:
+    toc: true
+    embed-resources: true
+
+execute:
+  echo: false
+  warning: false
+  
+from: markdown+emoji 
+---
+::: {.callout-tip icon="false"}
+## Github Repo Link
+
+<https://github.com/stat301-1-2023-fall/final-project-1-jedoriscar.git>
+:::
+
+::: callout-note
+## Prediction Problem
+
+For my final project memo, I plan to leverage the Project Implicit IAT dataset to predict implicit racial attitudes. The goal is to develop a predictive model using widely available data, enabling its applicability in future contexts. To achieve this, I will incorporate features such as political affiliation, county, state, religious affiliation, gender, age, occupation, and education level. By utilizing these diverse variables, the intention is to create a model that captures nuanced implicit racial attitudes and can potentially offer insights into the factors influencing such attitudes across various demographic categories. This approach aims to contribute to a broader understanding of implicit biases and foster the development of a predictive tool with practical applications in diverse settings.
+
+My research focuses on structural inequality, with a particular emphasis on implicit biases as a mechanism that perpetuates and reflects structural inequality. I aim to develop a machine learning model tailored for future datasets, leveraging only simple demographic information. Unlike traditional methods involving the Implicit Association Test (IAT), implementing which can be challenging due to participant defensiveness and logistical complexities, I intend to create a predictive model that circumvents these limitations. Participants often respond defensively to IAT feedback, potentially compromising interventions and revealing the research purpose. Moreover, the IAT's implementation at the individual level demands considerable time and effort from both the research team and participants. My goal is to design a model capable of predicting participant IAT scores, providing a practical tool that researchers, companies, and other entities can readily apply to their datasets without the constraints associated with traditional IAT methodologies.
+
+Implicit attitudes are quantified on a continuous scale, ranging from a pronounced racial preference for European Americans to Black Americans, to minimal or no preference for European Americans over Black Americans. This scale is represented by numeric values, reflecting a continuum of attitudes. In my analysis, I will focus on predicting this continuous value, treating it as a regression task. The goal is to develop a model that can accurately forecast the degree of implicit racial preference based on the provided features and contribute to a nuanced understanding of these attitudes.
+:::
+
+::: callout-note
+## Data Source and Quality Check
+
+```{r}
+library(ggplot2)
+iat <- read.csv("~/Documents/stat 301-2/301-2-Final-Project/Data/iat.csv")
+iat_codebook <- read_xlsx("~/Documents/stat 301-2/301-2-Final-Project/Data/Race_IAT_public_2023_codebook.xlsx")
+```
+
+```{r}
+#| echo: true
+iat %>% skimr::skim_without_charts()
+```
+
+The original racial IAT dataset for 2023 comprises over 700,000 observations. I have conducted a random sample, reducing the dataset to 50,000 observations, with a total of 474 variables. Among these, 18 variables are categorical, and the remaining 456 are numeric. Due to the staggered nature of participant questioning outside of the IAT, there is a level of missingness in the dataset. To address this, I will analyze the missingness for my variables of interest, using completion rates to understand the proportion of responses in each variable. The current feature variables and their respective completion rates are as follows: education (66%), political affiliation (66%), state/county (44%), religion (67%), gender identity (50%), birth year/birth month (90%), Metropolitan Statistical Area No. for US residents (66%), and race (18%). It is crucial to consider these missing rates, as they may necessitate imputation, and the extent of missingness can impact the performance of my models.
+
+The original racial IAT dataset for 2023 has over 700000 observations, so I have randomly sampled the dataset down to 50,000 observations, and there are 474 variables in total in this dataset. 18 of the variables are class character and the other 456 are numeric variables. Because the IAT dataset staggers when they ask participants questions outside of the IAT (i..e, only some people get certain questions), there is a certain degree of missingness in the data set. I will report on the missingness for my variables of interest, through reporting completion rate as this lets us know the proportion of responses in a given variable. My current feature varibales are: education (66% completion), political affiliation (66%), state/county (44%), religion (67%), genderidentity (50%), birthyear/birthmonth (90%), Metropolitan Statistical Area No. for US residents (66%), race (18%). The missing rates for each of these variables is important to keep in mind as I will likley have to impute values, and the missingness also has implications for my models performance.
+
+## Citation for dataset
+
+:::
+
+::: callout-note
+## Target Variable Analysis
+
+The focal point of my regression analysis is the target variable, implicit racial attitudes. The racial Implicit Association Test (IAT) involves a sorting task where participants categorize Black and White faces and words representing good or bad. The IAT assesses the association of White with goodness and generates a score, specifically represented in the dataset as the variable D.biep.White_Good_All. This score is computed by considering the speed and frequency with which participants sort white-associated and good-associated stimuli. In this context, an IAT D score of 0.15 or lower signifies no preference, 0.16--0.35 indicates a slight white implicit preference, 0.36--0.65 suggests a moderate white implicit preference, and scores higher than 0.65 represent a strong white implicit preference. Conversely, negative scores indicate a black implicit preference, with similar interpretations for the respective categories. This detailed scoring system allows for a nuanced understanding of participants' implicit racial attitudes.
+
+```{r}
+iat %>% ggplot(aes(x = D_biep.White_Good_all)) + geom_histogram(color = "powderblue", fill = "powderblue") + theme_minimal() + labs(x = "IAT Scores", subtitle = "Higher Scores Indicate a Stronger Prefrence for European White Americans vs. Black Americans")
+```
+
+The plot indicates that the distribution of the outcome variable is approximately normal, eliminating the necessity for any transformation. This is advantageous, as I prefer to retain the data on its original scale for ease of interpretation later in the analysis. The target supervising variable, D_biep.White_Good_all, boasts a completion rate of 70%, mirroring the completion rates of the feature variables. This level of completion, at 70%, seems reasonable to me, and I am confident in proceeding with this variable. In case of missing values, I am comfortable with the prospect of imputing values at a later stage in the analysis.
+:::
